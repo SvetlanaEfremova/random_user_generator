@@ -1,8 +1,0 @@
-C:\C-sharp lessons\Itransition internship\task5\task5\obj\Release\net6.0\PubTmp\Out\task5.exe
-C:\C-sharp lessons\Itransition internship\task5\task5\obj\Release\net6.0\PubTmp\Out\appsettings.Development.json
-C:\C-sharp lessons\Itransition internship\task5\task5\obj\Release\net6.0\PubTmp\Out\appsettings.json
-C:\C-sharp lessons\Itransition internship\task5\task5\obj\Release\net6.0\PubTmp\Out\task5.dll
-C:\C-sharp lessons\Itransition internship\task5\task5\obj\Release\net6.0\PubTmp\Out\task5.deps.json
-C:\C-sharp lessons\Itransition internship\task5\task5\obj\Release\net6.0\PubTmp\Out\task5.runtimeconfig.json
-C:\C-sharp lessons\Itransition internship\task5\task5\obj\Release\net6.0\PubTmp\Out\task5.pdb
-C:\C-sharp lessons\Itransition internship\task5\task5\obj\Release\net6.0\PubTmp\Out\Bogus.dll
