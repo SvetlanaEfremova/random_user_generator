@@ -6,18 +6,18 @@ namespace task5.Controllers
 {
     public class UserController : Controller
     {
-        private static int number = 0;
+        private int userNumber = 0;
         private Random random;
 
         public UserController()
         {
-            random = new Random();
+            random = new Random(0);
         }
 
         [HttpGet]
         public JsonResult RefreshNumberValue()
         {
-            number = 0;
+            userNumber = 0;
             return Json(new { success = true });
         }
 
@@ -28,31 +28,31 @@ namespace task5.Controllers
         }
 
         [HttpGet]
-        public IActionResult GetNewUsers(string region, int numOfUsers, int seed, double errorRate = 0)
+        public IActionResult GetNewUsers(string region, int numOfUsers, int seed, double errorRate = 0, int pageNum = 0)
         {
             random = new Random(seed);
-            var users = GenerateNewUsers(region, numOfUsers, seed);
+            var users = GenerateNewUsers(region, numOfUsers, seed, pageNum);
             if (errorRate > 1000) errorRate = 1000;
             if (errorRate != 0) AddErrorsToUsersData(users, region, errorRate);
             return Json(users);
         }
 
-        private List<User> GenerateNewUsers(string region = "en", int num = 20, int seed = 0)
+        private List<User> GenerateNewUsers(string region = "en", int numOfUsers = 20, int seed = 0, int pageNum = 0)
         {
             var faker = new Faker(region)
             {
                 Random = new Randomizer(seed)
             };
             var addressFormats = GetAddressFormats(faker);
-            return GenerateUsersList(faker,num,addressFormats);
+            return GenerateUsersList(faker,numOfUsers,addressFormats,pageNum);
         }
 
-        private List<User> GenerateUsersList(Faker faker, int num, Func<string>[] addressFormats)
+        private List<User> GenerateUsersList(Faker faker, int numOfUsers, Func<string>[] addressFormats, int pageNum = 0)
         {
-            var users = new List<User>(num);
-            for (int i = 0; i < num; i++)
+            var users = new List<User>(numOfUsers);
+            for (int i = 0; i < numOfUsers; i++)
             {
-                var user = CreateUserWithAddress(faker, addressFormats);
+                var user = CreateUserWithAddress(faker, addressFormats, pageNum,i);
                 users.Add(user);
             }
             return users;
@@ -69,20 +69,20 @@ namespace task5.Controllers
             };
         }
 
-        private User CreateUserWithAddress(Faker faker, Func<string>[] addressFormats)
+        private User CreateUserWithAddress(Faker faker, Func<string>[] addressFormats, int pageNum = 0, int userInd = 0)
         {
             var addressFormatIndex = random.Next(addressFormats.Length);
             var addressFormat = addressFormats[addressFormatIndex];
             var address = addressFormat();
-            return GetNewUser(faker, address);
+            return GetNewUser(faker, address, pageNum, userInd);
         }
 
-        private User GetNewUser(Faker faker, string address)
+        private User GetNewUser(Faker faker, string address, int pageNum = 0, int userInd = 0)
         {
-            number++;
+            userNumber = (pageNum > 0) ? 20 + (pageNum - 1) * 10 + userInd + 1 : userInd + 1;
             return new User()
             {
-                Number = number,
+                Number = userNumber,
                 Id = Guid.NewGuid().ToString(),
                 Name = faker.Name.FullName(),
                 Address = address,

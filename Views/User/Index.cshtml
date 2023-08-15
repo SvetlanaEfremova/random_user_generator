@@ -59,6 +59,8 @@
     let enteredSeed = 0;
     let errorRate = 0;
     let selectedRegion = "en";
+    let isLoading = false;
+    let isScrollLoading = false;
 
     console.log('debounce', debounce)
 
@@ -80,8 +82,8 @@
     }
 
     document.getElementById('seedInput').addEventListener('input', async (event) => {
-        enteredSeed = event.target.value || 0;
-        await updateTableData(true, 20);
+        enteredSeed = parseInt(event.target.value) || 0;
+        debouncedUpdateTableData();
     });
 
     document.getElementById('randomSeedButton').addEventListener('click', async () => {
@@ -97,19 +99,28 @@
     });
 
     document.addEventListener('scroll', async () => {
+        if (isScrollLoading || isLoading) {
+            return;
+        }
         if (window.innerHeight + window.scrollY >= document.documentElement.scrollHeight - 200) {
+            isScrollLoading = true;
             pageNum++;
-            await updateTableData(false, 10)
+            await updateTableData(false, 10);
+            isScrollLoading = false;
         }
     })
 
     window.addEventListener('load', async () => {
-        resetCounters();
+        await resetCounters();
         await updateTableData(true, 20);
     });
 
     async function updateTableData(reload, numOfUsers)
     {
+        if (isLoading) {
+            return;
+        }
+        isLoading = true;
         if (reload) {
             clearTable();
             await resetCounters();
@@ -120,6 +131,7 @@
         } catch (error) {
             console.error('error:', error);
         }
+        isLoading = false;
     }
 
     const debouncedUpdateTableData = debounce(function () {
@@ -153,16 +165,18 @@
         if (!response.ok) {
             throw new Error(`Error: ${response.status}`);
         }
-        const users = await response.json();
+        const users = response.json();
         return users;
     }
 
     async function sendRequestForUsers(numOfUsers) {
+        let seed = enteredSeed + pageNum;
         const url = new URL('/User/GetNewUsers', window.location.origin);
         url.searchParams.append('region', selectedRegion);
         url.searchParams.append('numOfUsers', numOfUsers);
-        url.searchParams.append('seed', enteredSeed + pageNum);
+        url.searchParams.append('seed', seed);
         url.searchParams.append('errorRate', errorRate);
+        url.searchParams.append('pageNum', pageNum);
         return await fetch(url, {
             method: 'GET',
         });
@@ -170,10 +184,10 @@
 
     async function resetCounters()
     {
+        pageNum = 0;
         await fetch('/User/RefreshNumberValue', {
             method: 'GET',
         });
-        pageNum = 0;
     }
 
     function debounce(func, wait, immediate = false) {
@@ -181,7 +195,6 @@
         return function () {
             var context = this,
                 args = arguments;
-
             var later = function () {
                 timeout = null;
                 if (!immediate) func.apply(context, args);
